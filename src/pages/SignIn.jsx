@@ -11,7 +11,7 @@ function SignIn() {
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
-    password: ' '
+    password: ''
   })
   const {email, password} = formData
 
