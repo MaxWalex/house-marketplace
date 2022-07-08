@@ -4,6 +4,7 @@ import {collection, getDocs, query, where, orderBy, limit, startAfter} from 'fir
 import {db} from '../firebase.config'
 import {toast} from 'react-toastify'
 import Spinner from '../components/Spinner'
+import Listingitem from '../components/Listingitem'
 
 function Category() {
     const [listings, setListings] = useState(null)
@@ -20,7 +21,7 @@ function Category() {
                 // Create a query
                 const q = query(
                     listingsRef, 
-                    // where('type', '==', params.categoryName), 
+                    where('type', '==', params.categoryName), 
                     orderBy('timestamp', 'desc'), 
                     limit(10)
                 )
@@ -45,7 +46,7 @@ function Category() {
         }
 
         fetchListings()
-    }, [])
+    }, [params.categoryName])
 
   return (
     <div className='category'>
@@ -62,7 +63,7 @@ function Category() {
                 <main>
                     <ul className="categoryListings">
                         {listings.map(listing => {
-                            return <h3>{listing.data.name}</h3>
+                            return <Listingitem key={listing.id} listing={listing.data} id={listing.id} />
                         })}
                     </ul>
                 </main>
