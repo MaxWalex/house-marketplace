@@ -72,13 +72,12 @@ function CreateListing() {
 
   const onSubmit = async (e) => {
     e.preventDefault()
-    
+
     setLoading(true)
 
     if (discountedPrice >= regularPrice) {
       setLoading(false)
       toast.error('Discounted price needs to be less than regular price')
-
       return
     }
 
@@ -89,10 +88,13 @@ function CreateListing() {
     }
 
     let geolocation = {}
-    let location 
-    console.log(geolocationEnabled)
+    let location
+
     if (geolocationEnabled) {
-      const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${process.env.REACT_APP_GEOCODE_API_KEY}`)
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${process.env.REACT_APP_GEOCODE_API_KEY}`
+      )
+
       const data = await response.json()
 
       geolocation.lat = data.results[0]?.geometry.location.lat ?? 0
@@ -111,11 +113,10 @@ function CreateListing() {
     } else {
       geolocation.lat = latitude
       geolocation.lng = longitude
-      location = address
     }
 
-    // Store images in firebase
-    const storeImages = async (image) => {
+    // Store image in firebase
+    const storeImage = async (image) => {
       return new Promise((resolve, reject) => {
         const storage = getStorage()
         const fileName = `${auth.currentUser.uid}-${image.name}-${uuidv4()}`
@@ -156,42 +157,57 @@ function CreateListing() {
     }
 
     const imgUrls = await Promise.all(
-      [...images].map((image) => storeImages(image))
+      [...images].map((image) => storeImage(image))
     ).catch(() => {
       setLoading(false)
       toast.error('Images not uploaded')
       return
     })
 
+    const formDataCopy = {
+      ...formData,
+      imgUrls,
+      geolocation,
+      timestamp: serverTimestamp(),
+    }
+
+    formDataCopy.location = address
+    delete formDataCopy.images
+    delete formDataCopy.address
+    !formDataCopy.offer && delete formDataCopy.discountedPrice
+
+    const docRef = await addDoc(collection(db, 'listings'), formDataCopy)
     setLoading(false)
+    toast.success('Listing saved')
+    navigate(`/category/${formDataCopy.type}/${docRef.id}`)
   }
 
   const onMutate = (e) => {
-        let boolean = null
+    let boolean = null
 
-        if (e.target.value === 'true') {
-          boolean = true
-        }
-        if (e.target.value === 'false') {
-          boolean = false
-        }
-
-        // Files
-        if(e.target.files) {
-            setFormData((prevState) => ({
-                ...prevState,
-                images: e.target.files
-            }))
-        }
-
-        // Text/Booleans/Numbers
-        if (!e.target.files) {
-            setFormData((prevState) => ({
-                ...prevState,
-                [e.target.id]: boolean ?? e.target.value,
-            }))
-        }
+    if (e.target.value === 'true') {
+      boolean = true
     }
+    if (e.target.value === 'false') {
+      boolean = false
+    }
+
+    // Files
+    if (e.target.files) {
+      setFormData((prevState) => ({
+        ...prevState,
+        images: e.target.files,
+      }))
+    }
+
+    // Text/Booleans/Numbers
+    if (!e.target.files) {
+      setFormData((prevState) => ({
+        ...prevState,
+        [e.target.id]: boolean ?? e.target.value,
+      }))
+    }
+  }
 
   if (loading) {
     return <Spinner />
@@ -436,4 +452,3 @@ function CreateListing() {
 }
 
 export default CreateListing
-
