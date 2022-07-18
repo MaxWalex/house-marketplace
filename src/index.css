@@ -344,6 +344,10 @@ button {
   z-index: 1;
 }
 
+.sliderOnMain {
+  height: 500px;
+}
+
 .swiper-pagination-bullet {
   opacity: 0.5;
   width: 10px;

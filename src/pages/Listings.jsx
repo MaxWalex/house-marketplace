@@ -38,9 +38,6 @@ function Listings() {
         return <Spinner />
     }
 
-    listing.imgUrls.map((url, index) => {
-        console.log(url, index)
-    })
 
   return (
     <main>
