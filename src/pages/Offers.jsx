@@ -29,14 +29,15 @@ function Offers() {
           listingsRef,
           where('offer', '==', true),
           orderBy('timestamp', 'desc'),
-          limit(10)
+          limit(1)
         )
+
+        const lastVisible = querySnap.docs[querySnap.docs.length - 1]
+
+        setLastFetchedListing(lastVisible)
 
         // Execute query
         const querySnap = await getDocs(q)
-
-        const lastVisible = querySnap.docs[querySnap.docs.length - 1]
-        setLastFetchedListing(lastVisible)
 
         const listings = []
 
